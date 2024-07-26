@@ -1,8 +1,13 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { sequelize } = require('./models');
+const cors = require('cors');
+const session = require('express-session');
+const mysql = require('mysql');
 
 const app = express();
+// Enable CORS
+app.use(cors());
+
 const port = 3002;
 
 app.use(bodyParser.json());
