@@ -14,7 +14,7 @@ sequelize.sync().then(() => {
 
 // Routes
 const profileRoutes = require('./routes/profileRoutes');
-app.use('/api/profiles', profileRoutes);
+app.use('/profiles', profileRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
