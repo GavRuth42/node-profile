@@ -22,7 +22,7 @@ sequelize.authenticate()
   .catch(err => console.log('Error: ' + err));
 
 // Define models and sync them
-const User = sequelize.define('user', {
+const User = sequelize.define('profile', {
   name: {
     type: Sequelize.STRING
   },
@@ -34,6 +34,10 @@ const User = sequelize.define('user', {
   },
   bio: {
     type: Sequelize.TEXT
+  },
+  profileCreated: {
+    type: Sequelize.BOOLEAN,
+    defaultValue: false
   }
 });
 
@@ -45,12 +49,37 @@ sequelize.sync().then(() => {
 app.post('/profiles', async (req, res) => {
   try {
     const { name, email, age, bio } = req.body;
-    const profile = await User.create({ name, email, age, bio });
+    const userId = req.user.id; // Assume the user ID is available in the request
+    const profile = await User.update(
+      { name, email, age, bio, profileCreated: true },
+      { where: { id: userId } }
+    );
     res.status(201).json(profile);
   } catch (error) {
     res.status(500).json({ error: 'Error saving profile' });
   }
 });
+app.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ where: { email } });
+    
+    if (!user) {
+      return res.status(400).json({ error: 'User not found' });
+    }
+    
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Invalid credentials' });
+    }
+    
+    const token = jwt.sign({ id: user.id }, 'your_jwt_secret', { expiresIn: '1h' });
+    res.json({ token, profileCreated: user.profileCreated });
+  } catch (error) {
+    res.status(500).json({ error: 'Error logging in' });
+  }
+});
+
 
 app.listen(3002, () => {
   console.log('Server is running on port 3002');
