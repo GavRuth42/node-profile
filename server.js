@@ -59,26 +59,7 @@ app.post('/profiles', async (req, res) => {
     res.status(500).json({ error: 'Error saving profile' });
   }
 });
-app.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ where: { email } });
-    
-    if (!user) {
-      return res.status(400).json({ error: 'User not found' });
-    }
-    
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ error: 'Invalid credentials' });
-    }
-    
-    const token = jwt.sign({ id: user.id }, 'your_jwt_secret', { expiresIn: '1h' });
-    res.json({ token, profileCreated: user.profileCreated });
-  } catch (error) {
-    res.status(500).json({ error: 'Error logging in' });
-  }
-});
+
 
 
 app.listen(3002, () => {
